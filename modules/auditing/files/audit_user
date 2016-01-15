@@ -1,0 +1,21 @@
+#
+# Copyright (c) 1988 by Sun Microsystems, Int.
+#
+# ident	"@(#)audit_user.txt	1.6	00/07/17 SMI"
+#
+#
+# User Level Audit User File
+#
+# File Format
+#
+#	username:always:never
+#
+root:lo:no,ps,fm,ex,fc,fd,nt,fw
+daemon::no,ps,fm,ex,fc,fd,nt,fw
+webservd::no,ps,fm,ex,fc,fd,nt,fw
+rriver::no,ps,fm,ex,fc,fd,nt,fw
+rdab::no,ps,fm,ex,fc,fd,nt,fw
+rwerdna::no,ps,fm,ex,fc,fd,nt,fw
+rsimetrical::no,ps,fm,ex,fc,fd,nt,fw
+rdaniel::no,ps,fm,ex,fc,fd,nt,fw
+ravar::no,ps,fm,ex,fc,fd,nt,fw

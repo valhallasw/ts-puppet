@@ -1,0 +1,77 @@
+#! /usr/bin/perl -w
+
+use strict;
+use DBI;
+
+# LOW_LIMIT:  if replag is greater than this, kill all queries
+#             running longer than <replag> seconds which are
+#             not SLOW_OK.
+#
+# CRIT_LIMIT: if replag is greater than this, kill all queries
+#             running longer than <replag> seconds.
+
+my $LOW_LIMIT = 600;	# 10 minutes
+my $CRIT_LIMIT = 1800;	# 30 minutes
+
+# Connect to database
+my $dbh = DBI->connect(
+	   "DBI:mysql:host=localhost;mysql_read_default_file=/root/.my.cnf",
+	   undef, undef
+   ) or exit;
+my $sth = undef;
+
+# Fetch current replag
+$sth = $dbh->prepare("SHOW SLAVE STATUS");
+$sth->execute or die $dbh->errstr;
+my $row = $sth->fetchrow_hashref or exit;
+my $replag = $row->{Seconds_Behind_Master};
+$sth->finish;
+
+my $do_replag = 0;
+$do_replag = 1 if defined($replag) and $replag >= $LOW_LIMIT;
+
+# Fetch processlist
+$sth = $dbh->prepare("SHOW FULL PROCESSLIST") or die "error: " . $dbh->errstr;
+$sth->execute or die $dbh->errstr;
+
+my @ids = ();
+# For each query...
+while (my @row = $sth->fetchrow_array()) {
+	my ($id, $user, $host, $db, $command, $time, $state, $info) = @row;
+	my $limit = undef;
+
+	# Skip anything that's not an actively executing query
+	next unless $command eq "Query";
+
+	# Skip queries from root or system user (replication), and queries
+	# which are not from a Toolserver system (this means queries from
+	# localhost will be unaffected).
+	next if $user =~ /^(system user|root)$/
+		or $host !~ /\.toolserver\.org(:\d*)?$/;
+
+	# Check if there's a user-defined limit on the query
+	$limit = $1 if $info =~ /LIMIT:(\d+)/;
+
+	if (defined($limit) and $time > $limit) {
+		push @ids, $id;
+		next;
+	}
+
+	next unless $do_replag;
+
+	# If replag is less than $CRIT_LIMIT, only kill queries which aren't
+	# SLOW_OK.
+	next if $replag < $CRIT_LIMIT and $info =~ /SLOW_OK/;
+
+	# Skip queries which aren't running as long as the current replag
+	next if ($time * 1.2) < $replag;
+
+	print "Would kill $id ($user\@$host) on $db, $time seconds: $info\n";
+	push @ids, $id;
+}
+$sth->finish;
+
+for my $id (@ids) {
+	$dbh->do("KILL $id");
+}
+

@@ -1,0 +1,5 @@
+domain esi.toolserver.org
+search esi.toolserver.org toolserver.org
+nameserver 10.24.1.18
+nameserver 8.8.8.8
+

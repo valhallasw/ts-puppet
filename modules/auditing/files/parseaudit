@@ -1,0 +1,151 @@
+#! /usr/bin/perl -w
+
+use strict;
+use Switch;
+use Data::Dumper;
+
+open my $ADT, "praudit -d,,, $ARGV[0] |";
+
+# split one line into parameters
+sub split_line {
+	my $line = $_[0];
+	my @bits = split /,,,/, $line;
+	return @bits;
+}
+
+# read one complete audit record
+sub read_record {
+	my $hdl = $_[0];
+	my @lines;
+
+	my $started = 0;
+
+	# Read up to a 'header' record
+	while (my $line = <$hdl>) {
+		chop $line;
+		my @bits = split_line($line);
+
+		return \@lines if ($bits[0] eq "trailer");
+
+		$started = 1 if ($bits[0] eq "header");
+		push @lines, \@bits if $started;
+	}
+
+	return undef;
+}
+
+sub fmt_execve {
+	my $rec = $_[0];
+	my $ausr = "";
+	my $eusr = "";
+        my $rusr = "";
+	my $return = "";
+	my $path = "";
+	my $args = "";
+	my $timestamp = "";
+	my $pid = "";
+
+	foreach my $row (@$rec) {
+		switch ($row->[0]) {
+			case "header" { $timestamp = $row->[6]; next; }
+			case "path" { $path = $row->[1]; next; }
+			case "return" { $return = $row->[1]; next; }
+
+			case "exec_args" {
+				my @a = @$row;
+				$args = join(" ", @a[2..(@a - 1)]);
+				next;
+			}
+
+			case "subject" {
+				$ausr = $row->[1];
+				$eusr = $row->[2];
+				$rusr = $row->[4];
+				$pid = $row->[6];
+				next;
+			}
+		}
+	}
+
+	print "$timestamp: exec: $ausr/$eusr/$rusr($pid) [$path] $args ($return)\n";
+}
+
+sub fmt_connect {
+	my $rec = $_[0];
+	my ($ausr, $eusr, $rusr);
+	my ($laddr, $raddr);
+	my $return;
+	my $timestamp;
+	my $pid;
+
+	foreach my $row (@$rec) {
+		switch ($row->[0]) {
+			case "header" { $timestamp = $row->[6]; next; }
+			case "return" { $return = $row->[1]; next; }
+			case "socket" {
+				$laddr = sprintf("%s:%d", $row->[4], hex($row->[3]));
+				$raddr = sprintf("%s:%d", $row->[6], hex($row->[5]));
+				next;
+			}
+
+			case "path" {
+				$laddr = "-";
+				$raddr = $row->[1];
+				next;
+			}
+
+			case "subject" {
+				$ausr = $row->[1];
+				$eusr = $row->[2];
+				$rusr = $row->[4];
+				$pid = $row->[6];
+				next;
+			}
+		}
+	}
+
+	print "$timestamp: connect: $ausr/$eusr/$rusr($pid) $laddr -> $raddr ($return)\n";
+}
+
+sub fmt_open {
+	my $rec = $_[0];
+	my ($ausr, $eusr, $rusr);
+	my $type = "";
+	my $path = "?";
+	my $return;
+	my $timestamp;
+	my $pid;
+
+	foreach my $row (@$rec) {
+		switch ($row->[0]) {
+			case "header" { 
+				$timestamp = $row->[6]; 
+				$type = $1 if ($row->[3] =~ /^open\(2\) - (.*)/);
+				next; 
+			}
+			case "return" { $return = $row->[1]; next; }
+			case "path" { $path = $row->[1]; next; }
+			case "subject" {
+				$ausr = $row->[1];
+				$eusr = $row->[2];
+				$rusr = $row->[4];
+				$pid = $row->[6];
+				next;
+			}
+		}
+	}
+
+	print "$timestamp: open ($type): $ausr/$eusr/$rusr($pid) $path ($return)\n";
+}
+while (my $rec = read_record($ADT)) {
+	my $hdr = $rec->[0];
+
+	#print Dumper($rec);
+
+	switch ($hdr->[3]) {
+		case "fcntl(2)" { next; }
+		case "connect(2)" { fmt_connect($rec); next; }
+		case "execve(2)" { fmt_execve($rec); next; }
+		case /^open\(2\).*/ { fmt_open($rec); next; }
+	}
+}

@@ -1,0 +1,9 @@
+#
+# Copyright (c) 1988 by Sun Microsystems, Inc.
+#
+# ident	"@(#)audit_control.txt	1.4	00/07/17 SMI"
+#
+dir:/var/audit
+flags:ex,lo,ss,fw,nt
+minfree:20
+naflags:lo

@@ -1,0 +1,38 @@
+@	1D	IN SOA	a.ns-auth.toolserver.org. ts-admins.toolserver.org.	(
+				2011012001	; serial
+				12H		; refresh
+				2H		; retry
+				2W		; expiry
+				1H		; negative cache TTL
+				)
+
+@	1H IN NS	a.ns-auth.toolserver.org.
+ 	1H IN NS	b.ns-auth.toolserver.org.
+
+1	1H IN PTR	vl301-ve8.csw1-esams.wikimedia.org.
+10      1H IN PTR       ha-nfs.esi.toolserver.org.
+11      1H IN PTR       ha-ldap.esi.toolserver.org.
+12      1H IN PTR       ha-sql.esi.toolserver.org.
+13      1H IN PTR       ha-dns-recursor.esi.toolserver.org.
+14      1H IN PTR       ha-proxy.esi.toolserver.org.
+15      1H IN PTR       ha-sql-proxy.esi.toolserver.org.
+16      1H IN PTR       ha-sge.esi.toolserver.org.
+20      1H IN PTR       turnera-bge0.esi.toolserver.org.
+21      1H IN PTR       turnera-bge1.esi.toolserver.org.
+22      1H IN PTR       turnera-bge0-test.esi.toolserver.org.
+23      1H IN PTR       turnera-bge1-test.esi.toolserver.org.
+24      1H IN PTR       damiana-bge0.esi.toolserver.org.
+25      1H IN PTR       damiana-bge1.esi.toolserver.org.
+26      1H IN PTR       damiana-bge0-test.esi.toolserver.org.
+27      1H IN PTR       damiana-bge1-test.esi.toolserver.org.
+28      1H IN PTR       scs-oe10-esams.esi.toolserver.org.
+29      1H IN PTR       scs-oe16-esams.esi.toolserver.org.
+30      1H IN PTR       thyme.esi.toolserver.org.
+31      1H IN PTR       ptolemy.esi.toolserver.org.
+32      1H IN PTR       hemlock.esi.toolserver.org.
+33      1H IN PTR       rosemary.esi.toolserver.org.
+34      1H IN PTR       hyacinth.esi.toolserver.org.
+35      1H IN PTR       yarrow.esi.toolserver.org.
+36	1H IN PTR	cassia.esi.toolserver.org.
+37	1H IN PTR	clematis.esi.toolserver.org.
+38	1H IN PTR	adenia.esi.toolserver.org.

@@ -1,0 +1,8 @@
+This is the Wikimedia Toolserver.
+
+[1mRules[0m: https://wiki.toolserver.org/view/Rules
+[1mDocumentation[0m: https://wiki.toolserver.org/view/Getting_started
+
+This is the job submission server.  Use this host to submit jobs to SGE,
+but *do not* run tools on the host itself.
+

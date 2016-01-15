@@ -1,0 +1,4 @@
+[expresstrain_*]
+	user root
+	env.MYSQL_ARGS --defaults-file=/root/.my.cnf -hlocalhost
+

@@ -1,0 +1,46 @@
+#!/usr/bin/ruby1.8
+
+sensors = ['temperature', 'fan', 'voltage', 'chassis']
+
+def higher_of(a,b)
+   if (a > b): return a
+   else return b
+   end
+end
+
+$ok = 0
+$warn = 1
+$crit = 2
+
+$status_names = {
+	$ok => :ok,
+	$warn => :warn,
+	$crit => :critical}
+
+def parse_status(sensor) 
+	ipmitool = '/usr/bin/ipmitool -I open -S /var/cache/ipmi-sdr-cache -U root sdr type'
+	status = $ok;
+
+	temp=`#{ipmitool} #{sensor}`
+	temp.each_line do |line|
+		line =~ / cr / && status = $crit;
+		line =~ / nr / && status = $crit;
+		line =~ / nc / && status = higher_of(status, $warn)
+		# other matches (ns, ok, ...) are deemed OK
+	end
+
+	return status
+end
+
+result = $ok
+info_line = "" 
+
+sensors.each do |sensor|
+	st = parse_status(sensor)
+	info_line ="#{info_line} #{sensor} #{$status_names[st]}" 
+	result = higher_of(result, st)
+end
+
+info_line="#{$status_names[result]}: #{info_line}" 
+puts info_line 
+exit result

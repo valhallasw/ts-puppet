@@ -1,0 +1,10 @@
+This is the Wikimedia Toolserver.
+
+[1mRules[0m: https://wiki.toolserver.org/view/Rules
+[1mDocumentation[0m: https://wiki.toolserver.org/view/Getting_started
+
+Users are now encouraged to use job scheduling (SGE) for *all* tools!
+For more information, see:
+  <https://wiki.toolserver.org/view/Job_scheduling>
+
+Next general maintenance window: [1;30mNone[0m.

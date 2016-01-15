@@ -1,0 +1,68 @@
+#soft_bounce = no
+queue_directory = /var/spool/postfix
+command_directory = /opt/ts/sbin
+daemon_directory = /opt/ts/lib
+data_directory = /var/lib/postfix
+mail_owner = postfix
+#default_privs = nobody
+#myhostname = host.domain.tld
+#mydomain = $myhostname
+#myorigin = $mydomain
+#inet_interfaces = all
+#proxy_interfaces = 1.2.3.4
+mydestination = $myhostname, localhost.$mydomain, localhost
+
+#local_recipient_maps = unix:passwd.byname $alias_maps
+#local_recipient_maps = proxy:unix:passwd.byname $alias_maps
+#local_recipient_maps =
+
+unknown_local_recipient_reject_code = 550
+
+mynetworks_style = host
+#mynetworks = 168.100.189.0/28, 127.0.0.0/8
+#mynetworks = $config_directory/mynetworks
+#mynetworks = hash:/etc/postfix/network_table
+
+#relay_domains = $mydestination
+
+#relayhost = $mydomain
+
+#relay_recipient_maps = hash:/etc/postfix/relay_recipients
+#in_flow_delay = 1s
+alias_maps = dbm:/etc/mail/aliases
+alias_database = dbm:/etc/mail/aliases
+
+recipient_delimiter = +
+#home_mailbox = Mailbox
+#home_mailbox = Maildir/
+#mail_spool_directory = /var/mail
+#mail_spool_directory = /var/spool/mail
+#mailbox_command = /some/where/procmail
+#mailbox_command = /some/where/procmail -a "$EXTENSION"
+#mailbox_transport = lmtp:unix:/file/name
+#mailbox_transport = cyrus
+#fallback_transport = lmtp:unix:/file/name
+#fallback_transport = cyrus
+#fallback_transport =
+#luser_relay = $user@other.host
+#luser_relay = $local@other.host
+#luser_relay = admin+$local
+#header_checks = regexp:/etc/postfix/header_checks
+#fast_flush_domains = $relay_domains
+smtpd_banner = $myhostname ESMTP 
+#local_destination_concurrency_limit = 2
+#default_destination_concurrency_limit = 20
+debug_peer_level = 2
+#debug_peer_list = 127.0.0.1
+#debug_peer_list = some.domain
+debugger_command =
+	 PATH=/bin:/usr/bin:/usr/local/bin:/usr/X11R6/bin
+	 ddd $daemon_directory/$process_name $process_id & sleep 5
+sendmail_path = /opt/ts/sbin/sendmail
+newaliases_path = /opt/ts/bin/newaliases
+mailq_path = /opt/ts/bin/mailq
+setgid_group = postdrop
+html_directory = no
+manpage_directory = /opt/ts/share/man
+sample_directory = /etc/opt/ts/postfix
+readme_directory = no

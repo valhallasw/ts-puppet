@@ -1,0 +1,16 @@
+mail=
+instance=overwrite
+partial=quit
+runlevel=quit
+idepend=nocheck
+rdepend=nocheck
+space=quit
+setuid=nocheck
+conflict=quit
+action=nocheck
+networktimeout=60
+networkretries=3
+authentication=quit
+keystore=/var/sadm/security
+proxy=
+basedir=default

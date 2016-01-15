@@ -1,0 +1,50 @@
+#! /bin/ksh
+
+set -e
+
+DATE=$(date +%Y-%m-%d)
+BCK_HOST=backups.toolserver.org
+BCK_USER=backups
+BCK_DIR=/backups/$DATE/$(hostname)/user-databases
+SSH="ssh"
+SCP="scp -Bq"
+MYSQL=/usr/bin/mysql
+MYSQLDUMP=/usr/bin/mysqldump
+MYSQL_ARGS="--defaults-file=/etc/mysql/debian.cnf -hlocalhost"
+
+if [[ -d /sql ]]; then
+	TMPDIR=/sql/backups-tmp
+elif [[ -d /aux0 ]]; then
+	TMPDIR=/aux0/backups-tmp
+else
+	echo >&1 "Cannot determine suitable TMPDIR"
+	exit 1
+fi
+
+cd /
+rm -rf $TMPDIR
+mkdir -p $TMPDIR
+cd $TMPDIR
+
+USER_DB=$($MYSQL $MYSQL_ARGS -BNe 'SHOW DATABASES LIKE "u\_%"')
+PROJECT_DB=$($MYSQL $MYSQL_ARGS -BNe 'SHOW DATABASES LIKE "p\_%"')
+DBLIST="$USER_DB $PROJECT_DB"
+
+$SSH ${BCK_USER}@$BCK_HOST "mkdir -p $BCK_DIR"
+
+for db in $DBLIST; do
+	file=$(echo $db | sed 's/[^a-zA-Z0-9_-]/./g')
+
+	# databases with _transient in the name get -d, i.e. schema dump only
+	if echo "$db" | grep '_transient' >/dev/null; then
+		$MYSQLDUMP $MYSQL_ARGS -d --opt $db | gzip >${file}.sql.gz
+	else
+		$MYSQLDUMP $MYSQL_ARGS --opt $db | gzip >${file}.sql.gz
+	fi
+
+	$SCP ${file}.sql.gz ${BCK_USER}@${BCK_HOST}:${BCK_DIR}
+	rm -f ${file}.sql.gz
+done
+
+cd /
+rmdir $TMPDIR

@@ -1,0 +1,2 @@
+class loginserver::files {
+}

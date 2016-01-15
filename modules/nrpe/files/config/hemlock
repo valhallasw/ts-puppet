@@ -1,0 +1,24 @@
+log_facility=daemon
+pid_file=/var/run/nrpe.pid
+server_port=5666
+#server_address=127.0.0.1
+nrpe_user=nobody
+nrpe_group=nogroup
+allowed_hosts=91.198.174.204,91.198.174.208,91.198.174.197,91.198.174.199,10.24.1.25,10.24.1.24,10.24.1.20,10.24.1.21
+dont_blame_nrpe=0
+# command_prefix=/usr/bin/sudo 
+debug=0
+command_timeout=60
+connection_timeout=300
+#allow_weak_random_seed=1
+#include=<somefile.cfg>
+#include_dir=<someotherdirectory>
+
+command[check_load]=/opt/ts/nagios/lib/check_load -w 15,15,15 -c 30,25,20
+command[check_aux0]=/opt/ts/nagios/lib/check_disk -w 10% -c 5% -p /aux0
+command[check_home]=/opt/ts/nagios/lib/check_disk -w 20% -c 10% -p /home
+command[check_root]=/opt/ts/nagios/lib/check_disk -w 20% -c 10% -p /
+command[check_smf]=/opt/ts/nagios/lib/check_smf
+command[check_sstcam]=/opt/ts/nagios/lib/check_sstcam -p
+command[check_ipmi]=/opt/ts/nagios/lib/check_ipmi
+command[check_tmp]=/opt/ts/nagios/lib/check_disk -w 20% -c 10% -p /tmp

@@ -1,0 +1,60 @@
+#! /bin/ksh
+# This file is under control of puppetd.
+
+. /sge/GE/default/common/settings.sh
+
+PATH=/usr/bin:$PATH
+
+usage() {
+	echo >&2 "usage: $0 [-sl] <jobname> [qsub options] <script> [script options]"
+	echo >&2 ""
+	echo >&2 "$0 is deprecated. Please use qcronsub instead."
+	echo >&2 ""
+}
+
+sflag=
+QUEUE="all.q"
+OPTS=""
+hrt=""
+while getopts slh f; do
+	case $f in
+		h) usage
+		   exit 0;;
+		s) sflag=y;;
+		l) QUEUE="longrun"; hrt="-l h_rt=INFINITY";;
+		?) usage
+		   exit 1;;
+	esac
+done
+shift $((OPTIND - 1))
+
+[[ $# -ge 1 ]] || {
+	usage
+	exit 1
+}
+
+JOBNAME="$1"; shift
+
+if ! [ -z "$sflag" ]; then
+	OPTS="-j y -o $HOME/${JOBNAME}.out"
+fi
+
+if [[ $# -ge 1 ]]; then
+	SCRIPT="$1"
+	TMPF=$(mktemp)
+	chmod 700 "$TMPF"
+	trap "rm -f $TMPF" 0
+	cat >$TMPF <<EOF
+#! /bin/sh
+cd \$HOME
+exec "\$@"
+exit 1
+
+EOF
+	grep '^#\$' <"$SCRIPT" >>$TMPF
+	qstat -r | grep "Full jobname:[ \t]*$JOBNAME\$" >/dev/null || \
+		qsub -N $JOBNAME $OPTS $hrt "$TMPF" "$@" >/dev/null
+else
+	qstat -r | grep "Full jobname:[ \t]*$JOBNAME\$" >/dev/null || \
+		qsub -N $JOBNAME $OPTS $hrt "$@" >/dev/null
+fi

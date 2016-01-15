@@ -1,0 +1,9 @@
+#!/bin/bash
+OLDPATH=$PATH
+
+[ -e /sge/GE/default/common/settings.sh ] && . /sge/GE/default/common/settings.sh
+
+# Reset the PATH for roto, just to be sure. --DaB.
+if [ "`id -u`" -eq 0 ]; then
+	PATH=${OLDPATH}:/sge/GE/bin/linux-x64
+fi

@@ -1,0 +1,25 @@
+#soft_bounce = no
+unknown_local_recipient_reject_code = 550
+
+myhostname = <%= fqdn %>
+mydomain = toolserver.org
+myorigin = $mydomain
+mydestination = $myhostname, localhost.$mydomain, localhost
+
+# Every system doesn't *need* to relay mail for every other system, but it's
+# easier to configure it this way than make an exception.
+mynetworks = 127.0.0.0/8, [::1]/128, 10.0.0.0/8, 91.198.174.0/24, [2620:0:862:101::]/48
+
+relayhost = $mydomain
+
+recipient_delimiter = +
+smtpd_banner = $myhostname ESMTP 
+
+alias_maps = hash:/etc/aliases, ldap:/etc/postfix/ldap-aliases.cf
+alias_database = hash:/etc/aliases
+
+html_directory = no
+readme_directory = no
+setgid_group = postdrop
+queue_directory = /var/spool/postfix
+mail_owner = postfix

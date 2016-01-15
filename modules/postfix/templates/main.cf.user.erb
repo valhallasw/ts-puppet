@@ -1,0 +1,79 @@
+# This is the configuration file for login servers.  Do not use it on
+# other hosts.
+
+# Enable for testing
+soft_bounce = no
+unknown_local_recipient_reject_code = 550
+
+# Local identity.
+myhostname = <%= fqdn %>
+mydomain = toolserver.org
+myorigin = $mydomain
+mynetworks = 127.0.0.0/8, [::1]/128
+
+relayhost = $mydomain
+
+###
+# toolserver.org mail forwarding setup.  Send to LDAP by default but allow
+# users to override it using .forward files.
+
+# We accept mail to toolserver.org; it's later processed by aliasd.
+mydestination = $myhostname, localhost.$mydomain, localhost,
+	toolserver.org, tools.wikimedia.de, ts.wikimedia.org
+
+# toolserver.org is handled by aliasd, so do a lookup there before delivering
+# mail locally.  If aliasd wants the mail to be delivered locally (via
+# .forward), it will just return a username, and local(8) will handle it as a
+# local delivery (.forward, etc).  Otherwise, aliasd returns the true
+# destination of the mail, usually an LDAP address, which bypasses local
+# delivery entirely.
+#
+# Don't list toolserver.org as a virtual_alias_domain because it stops
+# local delivery working.
+virtual_alias_maps = tcp:localhost:984
+
+alias_maps = dbm:/etc/mail/aliases, ldap:/etc/opt/ts/postfix/ldap-aliases.cf
+alias_database = dbm:/etc/mail/aliases
+
+recipient_delimiter = +
+smtpd_banner = $myhostname ESMTP 
+
+###
+# Some basic anti-spam settings.
+smtpd_error_sleep_time = 10s
+smtpd_soft_error_limit = 5
+smtpd_hard_error_limit = 10
+
+smtpd_helo_required = yes
+strict_rfc821_envelopes = yes
+disable_vrfy_command = yes
+
+smtpd_recipient_restrictions =
+	reject_non_fqdn_recipient
+	reject_non_fqdn_sender
+	reject_unknown_recipient_domain
+	reject_unknown_sender_domain
+	reject_unlisted_recipient
+	permit_mynetworks
+	reject_rbl_client zen.spamhaus.org
+	reject_unauth_destination
+	sleep 5, reject_unauth_pipelining
+	permit
+
+<% if classes.include?("postfix::amavis") %>
+<% end %>
+### 
+
+mail_owner = postfix
+html_directory = no
+readme_directory = no
+setgid_group = postdrop
+queue_directory = /var/spool/postfix
+command_directory = /opt/ts/sbin
+daemon_directory = /opt/ts/lib
+data_directory = /var/lib/postfix
+sendmail_path = /opt/ts/sbin/sendmail
+newaliases_path = /opt/ts/bin/newaliases
+mailq_path = /opt/ts/bin/mailq
+manpage_directory = /opt/ts/share/man
+sample_directory = /etc/opt/ts/postfix

@@ -1,0 +1,4 @@
+
+# non-free for the following packages:
+#*sun-java
+deb http://ftp.nl.debian.org/debian/ squeeze main non-free

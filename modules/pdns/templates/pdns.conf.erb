@@ -1,0 +1,31 @@
+## PowerDNS configuration for wita.toolserver.org
+
+daemon=yes
+setgid=other
+setuid=daemon
+guardian=yes
+disable-axfr=yes
+#local-address=<%= ipaddress %>
+#query-local-address=91.198.174.206
+loglevel=4
+query-logging=no
+
+cache-ttl=20
+query-cache-ttl=20
+negquery-cache-ttl=30
+
+default-soa-name=a.ns-auth.toolserver.org
+default-ttl=3600
+
+recursor=127.0.0.1:54
+
+# Backend configuration
+launch=pipe,bind
+load-modules=pipe
+
+bind-config=/etc/opt/ts/pdns/bind.conf
+
+pipebackend-abi-version=1
+pipe-timeout=1000
+pipe-command=/etc/opt/ts/pdns/wita.sh
+pipe-regex=^.*\.wita\.toolserver\.org;(A|ANY)$

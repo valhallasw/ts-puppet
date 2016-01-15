@@ -1,0 +1,6 @@
+[mysql_*]
+	user root
+	env.HOME /root
+	env.mysqladmin /opt/ts/mysql/5.1/bin/mysqladmin
+	env.mysqlconnection DBI:mysql:host=localhost;mysql_read_default_file=/root/.my.cnf
+

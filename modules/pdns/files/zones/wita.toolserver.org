@@ -1,0 +1,10 @@
+@	1D	IN SOA	a.ns-auth.toolserver.org. ts-admins.toolserver.org.	(
+				2	; serial
+				12H	; refresh
+				2H	; retry
+				2W	; expiry
+				1H	; negative cache TTL
+				)
+
+@	1H IN NS	a.ns-auth.toolserver.org.
+ 	1H IN NS	b.ns-auth.toolserver.org.

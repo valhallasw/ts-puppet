@@ -1,0 +1,88 @@
+#!/bin/bash
+#
+# Measures what the writer of expresstrain did.
+#
+# By DaB. <dab@toolserver.org>
+# BSD-license.
+
+PATH="/bin/:/usr/bin"
+
+MYSQL_ARGS=${MYSQL_ARGS:-"--defaults-file=/etc/mysql/debian.cnf -hlocalhost"}
+
+
+STATS=`mysql $MYSQL_ARGS --batch tsheartbeat -e \
+"SELECT st_name,
+ROUND(AVG(st_writer_slept)) AS writer_slept, 
+ROUND(AVG(st_writer_wait_db)) AS writer_wait_db 
+FROM stats 
+WHERE st_timestamp>(NOW() - INTERVAL 5 MINUTE) 
+GROUP BY st_name;
+"\
+|tail -n 1|tr '\t' ','`
+
+if [ "$1" = "config" ]; then
+
+echo "multigraph writerdoing"
+echo "graph_title Writer doing"
+echo 'graph_args --lower-limit 0'
+echo 'graph_category expresstrain'
+echo 'graph_vlabel ms' 
+
+echo 'slept.draw AREASTACK'
+echo 'slept.colour FFA500' 
+echo 'slept.label Slept (AVG)'
+echo 'dbwait.draw AREASTACK'
+echo 'dbwait.label Waited for DB (AVG)'
+
+for line in $STATS
+do
+name=`echo "$line"|cut -d',' -f 1`
+
+echo "multigraph writerdoing.${name}"
+echo "graph_title Writer doing for ${name}"  
+echo 'graph_args --lower-limit 0'
+echo 'graph_category expresstrain'
+echo 'graph_vlabel ms'
+
+echo 'slept.draw AREASTACK'
+echo 'slept.label Slept'
+echo 'slept.colour FFA500' 
+echo 'dbwait.draw AREASTACK'
+echo 'dbwait.label Waited for DB.'  
+
+done
+
+exit 0
+fi
+
+counter=0
+sleptAvg=0
+dbwaitAvg=0
+
+for line in $STATS
+do
+name=`echo "$line"|cut -d',' -f 1`
+slept=`echo "$STATS"|cut -d',' -f 2`
+dbwait=`echo "$STATS"|cut -d',' -f 3`
+
+echo "multigraph writerdoing.${name}"
+echo "slept.value ${slept}"
+echo "dbwait.value ${dbwait}"
+ 
+
+counter=$(($counter+1))
+sleptAvg=$(($sleptAvg+$slept))
+dbwaitAvg=$(($dbwaitAvg+$dbwait))
+
+done
+
+sleptAvg=$(($sleptAvg/$counter))
+dbwaitAvg=$(($dbwaitAvg/$counter))
+
+# Output total values.
+echo "multigraph writerdoing"
+echo "slept.value ${sleptAvg}"
+echo "dbwait.value ${dbwaitAvg}"
+
+
+#EOF

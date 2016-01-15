@@ -1,0 +1,11 @@
+@	1D	IN SOA	ha-dns-auth.toolserver.org. ts-admins.toolserver.org.	(
+				2010020201	; serial
+				12H		; refresh
+				2H		; retry
+				2W		; expiry
+				1H		; negative cache TTL
+				)
+
+@	1H IN NS	ha-dns-auth.toolserver.org.
+@	1H IN A		91.198.174.203
+*	1H IN A		91.198.174.203

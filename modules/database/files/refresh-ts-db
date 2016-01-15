@@ -1,0 +1,20 @@
+#! /bin/ksh
+
+set -e
+
+MYSQL=/opt/ts/mysql/5.1/bin/mysql
+MYSQLDUMP=/opt/ts/mysql/5.1/bin/mysqldump
+MYSQLADMIN=/opt/ts/mysql/5.1/bin/mysqladmin
+
+HOME=/root export HOME
+
+TABLES="wiki namespace namespacename language"
+
+for table in $TABLES; do
+	(
+		echo "BEGIN;  DELETE FROM $table;"
+		$MYSQLDUMP --skip-add-locks --skip-disable-keys -t 	\
+			-h sql-toolserver -uroot toolserver $table
+		echo "COMMIT;"
+	) | $MYSQL -uroot -h localhost toolserver
+done

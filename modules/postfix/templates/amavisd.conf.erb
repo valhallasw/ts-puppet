@@ -1,0 +1,244 @@
+use strict;
+# amavisd-new configuration file for the Toolserver.
+
+$myhostname = '<%= fqdn %>';
+$mydomain = 'toolserver.org';
+$daemon_user  = 'vscan';   # (no default;  customary: vscan or amavis), -u
+$daemon_group = 'vscan';   # (no default;  customary: vscan or amavis), -g
+$TEMPBASE = $MYHOME;	        # (must be set if other config vars use is), -T
+
+# set environment variables if you want (no defaults):
+$ENV{TMPDIR} = $TEMPBASE; # used for SA temporary files, by some decoders, etc.
+
+$enable_db = 1;              # enable use of BerkeleyDB/libdb (SNMP and nanny)
+$enable_global_cache = 1;    # enable use of libdb-based cache if $enable_db=1
+
+$enable_dkim_verification = 1;  # enable DKIM signatures verification
+$enable_dkim_signing = 0;    # load DKIM signing code, keys defined by dkim_key
+
+# Accept mail on port 10024
+$inet_socket_port = 10024;
+$inet_socket_bind = '127.0.0.1';
+# Send mail back to Postfix on port 10025
+$forward_method = 'smtp:[127.0.0.1]:10025';  # where to forward checked mail
+$notify_method = $forward_method;            # where to submit notifications
+
+$max_servers = 20;     # num of pre-forked children (2..30 is common), -m
+$max_requests = 20;   # retire a child after that many accepts (default 20)
+
+$child_timeout=5*60;  # abort child if it does not complete its processing in
+                      # approximately n seconds (default: 8*60 seconds)
+
+$smtpd_timeout = 90; # disconnect session if client is idle for too long
+                      # (default: 8*60 seconds); should be higher than a
+                      # Postfix setting max_idle (default 100s)
+
+@local_domains_maps = ( [".$mydomain"] );  # $mydomain and its subdomains
+
+$DO_SYSLOG = 1;                   # (defaults to 0)
+$syslog_ident = 'amavis';
+$syslog_facility = 'mail';
+$syslog_priority = 'debug';
+
+$log_level = 0;
+
+# using traditional settings of $final_*_destiny variables, relying on a
+# default setting of an associative array %final_destiny_by_ccat which is
+# backwards compatible and contains references to these traditional variables:
+#
+$final_virus_destiny      = D_DISCARD;
+$final_banned_destiny     = D_DISCARD;
+$final_spam_destiny       = D_DISCARD;
+$final_bad_header_destiny = D_PASS;
+
+# The full set of configurable administrator addresses is:
+#   @virus_admin_maps    ... notifications to admin about viruses
+#   @newvirus_admin_maps ... newly encountered viruses since amavisd startup
+#   @spam_admin_maps     ... notifications to admin about spam
+#   @banned_admin_maps   ... notifications to admin about banned contents
+#   @bad_header_admin_maps ... notifications to admin about bad headers
+
+$virus_admin = undef;
+$spam_admin = undef;
+$newvirus_admin = undef;
+$banned_admin = undef;
+$bad_header_admin = undef;
+
+$X_HEADER_TAG = 'X-Virus-Scanned';	# (default: 'X-Virus-Scanned')
+$undecipherable_subject_tag = undef;
+
+$remove_existing_x_scanned_headers = 0; # leave existing X-Virus-Scanned alone
+					# (defaults to false)
+$remove_existing_spam_headers = 0;     # leave existing X-Spam* headers alone
+$remove_existing_spam_headers  = 0;     # remove existing spam headers if
+					# spam scanning is enabled (default)
+
+@keep_decoded_original_maps = (new_RE(
+  qr'^MAIL$',   # retain full original message for virus checking
+  qr'^MAIL-UNDECIPHERABLE$',  # retain full mail if it contains undecipherables
+  qr'^(ASCII(?! cpio)|text|uuencoded|xxencoded|binhex)'i,
+# qr'^Zip archive data',      # don't trust Archive::Zip
+));
+
+# Don't ban anything
+$banned_filename_re = new_RE(
+);
+
+$banned_namepath_re = undef;  # to disable new-style
+
+%banned_rules = (
+#  'MYNETS-DEFAULT' => new_RE(   # permissive set of rules for internal hosts
+#    [ qr'^\.(rpm|cpio|tar)$' => 0 ],  # allow any name/type in Unix archives
+#    qr'.\.(vbs|pif|scr)$'i,     # banned extension - rudimentary
+#  ),
+  'DEFAULT' => $banned_filename_re,
+);
+
+$sql_select_white_black_list = undef;  # undef disables SQL white/blacklisting
+$recipient_delimiter = '+';		# (default is undef, i.e. disabled)
+$replace_existing_extension = 0;	# (default is true)
+$localpart_is_case_sensitive = 0;	# (default is false)
+
+@score_sender_maps = ({  # a by-recipient hash lookup table
+
+# # per-recipient personal tables  (NOTE: positive: black, negative: white)
+# 'user1@example.com'  => [{'bla-mobile.press@example.com' => 10.0}],
+# 'user3@example.com'  => [{'.ebay.com'                 => -3.0}],
+# 'user4@example.com'  => [{'cleargreen@cleargreen.com' => -7.0,
+#                           '.cleargreen.com'           => -5.0}],
+
+  # site-wide opinions about senders (the '.' matches any recipient)
+  '.' => [  # the _first_ matching sender determines the score boost
+
+   new_RE(  # regexp-type lookup table, just happens to be all soft-blacklist
+    [qr'^(bulkmail|offers|cheapbenefits|earnmoney|foryou)@'i         => 5.0],
+    [qr'^(greatcasino|investments|lose_weight_today|market\.alert)@'i=> 5.0],
+    [qr'^(money2you|MyGreenCard|new\.tld\.registry|opt-out|opt-in)@'i=> 5.0],
+    [qr'^(optin|saveonlsmoking2002k|specialoffer|specialoffers)@'i   => 5.0],
+    [qr'^(stockalert|stopsnoring|wantsome|workathome|yesitsfree)@'i  => 5.0],
+    [qr'^(your_friend|greatoffers)@'i                                => 5.0],
+    [qr'^(inkjetplanet|marketopt|MakeMoney)\d*@'i                    => 5.0],
+   ),
+
+#  read_hash("/var/amavis/sender_scores_sitewide"),
+
+   { # a hash-type lookup table (associative array)
+     'nobody@cert.org'                        => -3.0,
+     'cert-advisory@us-cert.gov'              => -3.0,
+     'owner-alert@iss.net'                    => -3.0,
+     'slashdot@slashdot.org'                  => -3.0,
+     'securityfocus.com'                      => -3.0,
+     'ntbugtraq@listserv.ntbugtraq.com'       => -3.0,
+     'security-alerts@linuxsecurity.com'      => -3.0,
+     'mailman-announce-admin@python.org'      => -3.0,
+     'amavis-user-admin@lists.sourceforge.net'=> -3.0,
+     'amavis-user-bounces@lists.sourceforge.net' => -3.0,
+     'spamassassin.apache.org'                => -3.0,
+     'notification-return@lists.sophos.com'   => -3.0,
+     'owner-postfix-users@postfix.org'        => -3.0,
+     'owner-postfix-announce@postfix.org'     => -3.0,
+     'owner-sendmail-announce@lists.sendmail.org'   => -3.0,
+     'sendmail-announce-request@lists.sendmail.org' => -3.0,
+     'donotreply@sendmail.org'                => -3.0,
+     'ca+envelope@sendmail.org'               => -3.0,
+     'noreply@freshmeat.net'                  => -3.0,
+     'owner-technews@postel.acm.org'          => -3.0,
+     'ietf-123-owner@loki.ietf.org'           => -3.0,
+     'cvs-commits-list-admin@gnome.org'       => -3.0,
+     'rt-users-admin@lists.fsck.com'          => -3.0,
+     'clp-request@comp.nus.edu.sg'            => -3.0,
+     'surveys-errors@lists.nua.ie'            => -3.0,
+     'emailnews@genomeweb.com'                => -5.0,
+     'yahoo-dev-null@yahoo-inc.com'           => -3.0,
+     'returns.groups.yahoo.com'               => -3.0,
+     'clusternews@linuxnetworx.com'           => -3.0,
+     lc('lvs-users-admin@LinuxVirtualServer.org')    => -3.0,
+     lc('owner-textbreakingnews@CNNIMAIL12.CNN.COM') => -5.0,
+
+     # soft-blacklisting (positive score)
+     'sender@example.net'                     =>  3.0,
+     '.example.net'                           =>  1.0,
+
+   },
+  ],  # end of site-wide tables
+});
+
+$MAXLEVELS = 14;		# (default is undef, no limit)
+$MAXFILES = 1500;		# (default is undef, no limit)
+
+$MIN_EXPANSION_QUOTA =      100*1024;  # bytes  (default undef, not enforced)
+$MAX_EXPANSION_QUOTA = 300*1024*1024;  # bytes  (default undef, not enforced)
+$MIN_EXPANSION_FACTOR =   5;  # times original mail size  (default is 5)
+$MAX_EXPANSION_FACTOR = 500;  # times original mail size  (default is 500)
+
+$virus_check_negative_ttl=  3*60; # time to remember that mail was not infected
+$virus_check_positive_ttl= 30*60; # time to remember that mail was infected
+$spam_check_negative_ttl = 10*60; # time to remember that mail was not spam
+$spam_check_positive_ttl = 30*60; # time to remember that mail was spam
+
+$path = '/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/usr/bin:/bin:/opt/ts/bin:/opt/ts/sbin';
+$file   = '/opt/ts/bin/nfile';
+
+@decoders = (
+  ['mail', \&do_mime_decode],
+  ['asc',  \&do_ascii],
+  ['uue',  \&do_ascii],
+  ['hqx',  \&do_ascii],
+  ['ync',  \&do_ascii],
+  ['F',    \&do_uncompress, ['unfreeze','freeze -d','melt','fcat'] ],
+  ['Z',    \&do_uncompress, ['uncompress','gzip -d','zcat'] ],
+  ['gz',   \&do_uncompress,  'gzip -d'],
+  ['gz',   \&do_gunzip],
+  ['bz2',  \&do_uncompress,  'bzip2 -d'],
+  ['lzo',  \&do_uncompress,  'lzop -d'],
+  ['rpm',  \&do_uncompress, ['rpm2cpio.pl','rpm2cpio'] ],
+  ['cpio', \&do_pax_cpio,   ['pax','gcpio','cpio'] ],
+  ['tar',  \&do_pax_cpio,   ['pax','gcpio','cpio'] ],
+  ['deb',  \&do_ar,          'ar'],
+# ['a',    \&do_ar,          'ar'],  # unpacking .a seems an overkill
+  ['zip',  \&do_unzip],
+  ['7z',   \&do_7zip,       ['7zr','7za','7z'] ],
+  ['rar',  \&do_unrar,      ['rar','unrar'] ],
+  ['arj',  \&do_unarj,      ['arj','unarj'] ],
+  ['arc',  \&do_arc,        ['nomarch','arc'] ],
+  ['zoo',  \&do_zoo,        ['zoo','unzoo'] ],
+  ['lha',  \&do_lha,         'lha'],
+# ['doc',  \&do_ole,         'ripole'],
+  ['cab',  \&do_cabextract,  'cabextract'],
+  ['tnef', \&do_tnef_ext,    'tnef'],
+  ['tnef', \&do_tnef],
+# ['sit',  \&do_unstuff,     'unstuff'],  # broken/unsafe decoder
+  ['exe',  \&do_executable, ['rar','unrar'], 'lha', ['arj','unarj'] ],
+);
+
+
+$sa_local_tests_only = 0;   # only tests which do not require internet access?
+$sa_mail_body_size_limit = 400*1024; # don't waste time on SA if mail is larger
+
+$sa_tag_level_deflt  = 2.0;
+$sa_tag2_level_deflt = 5.0;
+$sa_kill_level_deflt = 15.0;
+
+$sa_spam_subject_tag = '[SPAM] ';
+$sa_spam_report_header = 1;
+
+$first_infected_stops_scan = 1;
+
+@av_scanners = (
+# ### http://www.clamav.net/
+# ['ClamAV-clamd',
+#   \&ask_daemon, ["CONTSCAN {}\n", "/var/run/clamav/clamd"],
+#   qr/\bOK$/m, qr/\bFOUND$/m,
+#   qr/^.*?: (?!Infected Archive)(.*) FOUND$/m ],
+# # NOTE: run clamd under the same user as amavisd, or run it under its own
+# #   uid such as clamav, add user clamav to the amavis group, and then add
+# #   AllowSupplementaryGroups to clamd.conf;
+# # NOTE: match socket name (LocalSocket) in clamav.conf to the socket name in
+# #   this entry; when running chrooted one may prefer socket "$MYHOME/clamd".
+);
+
+@av_scanners_backup = (
+ ['always-clean', sub {0}],
+);
+
+1;  # insure a defined return value

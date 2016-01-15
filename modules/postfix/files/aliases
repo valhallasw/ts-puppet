@@ -1,0 +1,14 @@
+root:		admins
+postmaster:	root
+MAILER-DAEMON:	postmaster
+
+bin:		root
+daemon:		root
+system:		root
+toor:		root
+uucp:		root
+manager:	root
+dumper:		root
+operator:	root
+decode:		root
+nobody: /dev/null

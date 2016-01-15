@@ -1,0 +1,28 @@
+#!/bin/bash
+#
+# Measures the replication of a database.
+#
+# By DaB. <dab@toolserver.org>
+# BSD-license.
+
+PATH="/bin/:/usr/bin"
+
+DB=`basename $0 | sed 's/^mysql_replag_//g'`
+
+if [ "$1" = "config" ]; then
+
+	echo "graph_title Replag of ${DB}"
+	echo 'graph_args --lower-limit 0'
+	echo 'graph_category mysql'
+	
+	echo 'replag.draw AREA'
+	echo 'replag.label replag'
+
+exit 0
+fi
+
+
+REPLAG=`mysql --batch "${DB}_p" -e 'SELECT ts_replag FROM ts_replag;'|tail -n 1`
+echo "replag.value $REPLAG"
+
+#EOF

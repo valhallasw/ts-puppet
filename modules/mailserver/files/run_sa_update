@@ -1,0 +1,5 @@
+#! /bin/ksh
+
+PATH=/usr/bin:/opt/ts/bin:/usr/cluster/bin
+/opt/local/bin/isactive exim || exit 0
+sa-update && ( clrs disable spamd; clrs enable spamd )

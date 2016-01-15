@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Server port="8005" shutdown="Tho6oavaithekiej">
+	<Listener className="org.apache.catalina.core.AprLifecycleListener" SSLEngine="on" />
+	<Listener className="org.apache.catalina.core.JasperListener" />
+	<Listener className="org.apache.catalina.core.JreMemoryLeakPreventionListener" />
+	<Listener className="org.apache.catalina.mbeans.GlobalResourcesLifecycleListener" />
+	<Listener className="org.apache.catalina.core.ThreadLocalLeakPreventionListener" />
+
+	<GlobalNamingResources>
+	</GlobalNamingResources>
+
+	<Service name="Catalina">
+		<Connector port="8080" protocol="HTTP/1.1" connectionTimeout="20000" 
+			enableLookups="false" proxyName="toolserver.org" proxyPort="80"
+			redirectPort="443" URIEncoding="UTF-8" address="127.0.0.1" />
+
+		<Engine name="Catalina" defaultHost="localhost">
+			<Host name="localhost"  appBase="/www/tomcat/webapps"
+				unpackWARs="false" autoDeploy="true">
+			</Host>
+		</Engine>
+	</Service>
+</Server>

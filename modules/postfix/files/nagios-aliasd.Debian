@@ -1,0 +1,4 @@
+# NRPE-Config for all postfix-checks.
+command[check_aliasd]=/usr/lib/nagios/plugins/check_tcp -H 127.0.0.1 -p 984 -E -s "get dab\n" -e "200" -e 500
+
+#EOF

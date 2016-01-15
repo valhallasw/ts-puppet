@@ -1,0 +1,27 @@
+Package: *
+Pin: release o=Debian,a=stable
+Pin-Priority: 900
+
+Package: *
+Pin: release o=Debian,a=testing
+Pin-Priority: 400
+
+Package: *
+Pin: release o=Debian,a=unstable
+Pin-Priority: 100
+
+Package: *
+Pin: release o=Debian,l=Debian-Security,a=stable
+Pin-Priority: 950
+
+Package: *
+Pin: release o=Debian,l=Debian-Security,a=testing
+Pin-Priority: 450
+
+Package: *
+Pin: release o=Debian
+Pin-Priority: -1
+
+Package: *              
+Pin: origin "toolserver.org"                  
+Pin-Priority: 1299

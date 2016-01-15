@@ -1,0 +1,44 @@
+#! /bin/ksh
+
+. /sge62/default/common/settings.sh
+
+PATH=/usr/bin:$PATH
+
+usage() {
+	echo >&2 "usage: $0 [-sl] <jobname> [qsub options] <script> [script options]"
+}
+
+sflag=
+QUEUE="all.q"
+OPTS=""
+hrt=""
+while getopts slh f; do
+	case $f in
+		h) usage
+		   exit 0;;
+		s) sflag=y;;
+		l) QUEUE="longrun"; hrt="-l h_rt=INFINITY";;
+		?) usage
+		   exit 1;;
+	esac
+done
+shift $((OPTIND - 1))
+
+[[ $# -ge 1 ]] || {
+	usage
+	exit 1
+}
+
+JOBNAME="$1"; shift
+
+if ! [ -z "$sflag" ]; then
+	OPTS="-j y -o $HOME/${JOBNAME}.out"
+fi
+
+SCRIPT="$1"; shift
+if [ ! -x "$SCRIPT" ]; then
+	echo >&2 "$0: not executable: $SCRIPT"
+	exit 1
+fi
+
+qstat -r | grep "Full jobname:[ \t]*$JOBNAME\$" >/dev/null || qsub -q "$QUEUE" -N $JOBNAME $OPTS $hrt /opt/local/bin/cronex "$SCRIPT" "$@" >/dev/null

@@ -1,0 +1,45 @@
+<VirtualHost *:80>
+	ServerName mayapple.toolserver.org
+
+	ServerAdmin webmaster@toolserver.org
+
+	DocumentRoot /www/toolserver.org
+
+
+	<Directory /www/toolserver.org/>
+		Options Indexes FollowSymLinks MultiViews
+		AllowOverride None
+		Order allow,deny
+		allow from all
+	</Directory>
+
+	ProxyPass         /isbn  		http://localhost:8080/isbn
+	ProxyPassReverse  /isbn			http://localhost:8080/isbn
+
+        ProxyPass         /lalm			http://localhost:8080/lalm
+        ProxyPassReverse  /lalm			http://localhost:8080/lalm
+
+        ProxyPass         /merliwbot		http://localhost:8080/merliwbot
+        ProxyPassReverse  /merliwbot		http://localhost:8080/merliwbot
+
+        ProxyPass         /sendmeto		http://localhost:8080/sendmeto
+        ProxyPassReverse  /sendmeto		http://localhost:8080/sendmeto
+
+        ProxyPass         /tsstatus		http://localhost:8080/tsstatus
+        ProxyPassReverse  /tsstatus		http://localhost:8080/tsstatus
+
+        ProxyPass         /tsthumb		http://localhost:8080/tsthumb
+        ProxyPassReverse  /tsthumb		http://localhost:8080/tsthumb
+
+        ProxyPass         /userregfinder	http://localhost:8080/tsthumb
+        ProxyPassReverse  /userregfinder	http://localhost:8080/tsthumb
+	
+
+	ErrorLog ${APACHE_LOG_DIR}/error.log
+
+	# Possible values include: debug, info, notice, warn, error, crit,
+	# alert, emerg.
+	LogLevel warn
+
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>

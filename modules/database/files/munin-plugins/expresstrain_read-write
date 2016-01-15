@@ -1,0 +1,74 @@
+#!/bin/bash
+#
+# Measures the number of readed and writed blocks of expresstrain.
+#
+# By DaB. <dab@toolserver.org>
+# BSD-license.
+
+PATH="/bin/:/usr/bin"
+
+MYSQL_ARGS=${MYSQL_ARGS:-"--defaults-file=/etc/mysql/debian.cnf -hlocalhost"}
+
+
+STATS=`mysql $MYSQL_ARGS --batch tsheartbeat -e "SELECT st_name,ROUND(AVG(st_reads)),ROUND(AVG(st_writes)) 
+FROM stats 
+WHERE st_timestamp>(NOW() - INTERVAL 5 MINUTE) 
+GROUP BY st_name;"|tail -n 1|tr '\t' ','`
+
+if [ "$1" = "config" ]; then
+
+echo "multigraph read_writes"
+echo "graph_title Reads and writes"
+echo 'graph_args --lower-limit 0'
+echo 'graph_category expresstrain'
+echo 'graph_vlabel Blocks'
+
+echo 'reads.draw AREA'
+echo 'reads.label Reads'
+echo 'writes.draw AREA' 
+echo 'writes.label Writes' 
+
+for line in $STATS
+do
+name=`echo "$line"|cut -d',' -f 1`
+
+echo "multigraph read_writes.${name}"
+echo "graph_title Reads and writes for ${name}"
+echo 'graph_args --lower-limit 0'
+echo 'graph_category expresstrain'
+echo 'graph_vlabel Blocks'
+
+echo 'reads.draw AREA'
+echo 'reads.label Reads'
+echo 'writes.draw AREA'
+echo 'writes.label Writes'
+done
+
+exit 0
+fi
+
+readsTotal=0
+writesTotal=0
+
+for line in $STATS
+do
+name=`echo "$line"|cut -d',' -f 1`
+reads=`echo "$STATS"|cut -d',' -f 2`
+writes=`echo "$STATS"|cut -d',' -f 3`
+
+echo "multigraph read_writes.${name}"
+echo "reads.value ${reads}"
+echo "writes.value ${writes}"
+
+readsTotal=$(($readsTotal+$reads))
+writesTotal=$(($writesTotal+$writes))
+
+done
+
+# Output total values.
+echo "multigraph read_writes"
+echo "reads.value ${readsTotal}"
+echo "writes.value ${writesTotal}"
+
+
+#EOF

@@ -1,0 +1,5 @@
+auth            sufficient      /usr/ts/lib/pam_ldap.so.1
+auth            include         system
+account         include         system
+session         required        pam_permit.so
+password        include         system

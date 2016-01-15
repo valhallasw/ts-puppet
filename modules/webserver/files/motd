@@ -1,0 +1,8 @@
+[1mRules[0m: https://wiki.toolserver.org/view/Rules
+[1mDocumentation[0m: https://wiki.toolserver.org/view/Getting_started
+
+This system is a web server, not a login server.  You may log into this
+system for web-related tasks, but tools must not be run here.
+
+Next general maintenance window: [1;30mNone[0m.
+

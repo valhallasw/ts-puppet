@@ -1,0 +1,5 @@
+[toolserver]
+metadata_expire = 0
+enabled = 1
+name = Toolserver repository
+baseurl = file:///install/rpms/freebsd8-amd64

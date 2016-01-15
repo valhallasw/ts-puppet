@@ -1,0 +1,14 @@
+#
+# nsswitch.conf(5) - name service switch configuration file
+# $FreeBSD: src/etc/nsswitch.conf,v 1.1.10.1.2.1 2009/10/25 01:10:29 kensmith Exp $
+#
+
+passwd:		files ldap
+group:		files ldap
+hosts:		files dns ldap
+networks:	files
+shells:		files
+services:	files ldap
+protocols:	files
+rpc:		files
+sudoers:	ldap

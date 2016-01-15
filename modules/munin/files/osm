@@ -1,0 +1,14 @@
+[renderd_*]
+env.statfile /var/tmp/renderd.stats
+env.PATH /opt/ts/gnu/bin:/opt/ts/bin:/usr/bin
+
+[replication_delay*]
+env.statefile /home/project/o/s/m/osm/tools/diff-import/state.txt
+env.PATH /opt/ts/gnu/bin:/opt/ts/bin:/usr/bin
+env.http_proxy http://ha-proxy.esi:8080
+
+[mod_tile*]
+env.PATH /opt/ts/gnu/bin:/opt/ts/bin:/usr/bin
+
+[tirex*]
+env.configfile /home/project/o/s/m/osm/tirex/etc/tirex/tirex.conf

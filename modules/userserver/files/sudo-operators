@@ -1,0 +1,21 @@
+Defaults:%operator 	syslog=local2, syslog_badpri=alert, syslog_goodpri=notice
+Defaults:%operator 	!authenticate
+
+Cmnd_Alias APTGET     	= /usr/bin/apt-get update,/usr/bin/apt-get upgrade
+Cmnd_Alias CRON       	= /usr/bin/crontab
+Cmnd_Alias INVOKERC     = /usr/sbin/invoke-rc.d
+Cmnd_Alias KILL		= /usr/bin/pkill *-u *,/bin/kill
+Cmnd_Alias RF   	= /bin/rm -I*
+Cmnd_Alias SGE          = /sge/GE/bin/linux-x64/qstat,/sge/GE/bin/linux-x64/qdel,/sge/GE/bin/linux-x64/qalter,/sge/GE/bin/linux-x64/qmod
+Cmnd_Alias SHUTDOWN     = /usr/sbin/shutdown -r*
+
+%operator ALL=(root) APTGET
+%operator ALL=(root) NOEXEC:CRON
+%operator ALL=(root) INVOKERC
+%operator ALL=(root) NOEXEC:KILL
+%operator ALL=(root) NOEXEC:RF
+%operator ALL=(root) NOEXEC:SGE
+%operator ALL=(root) SHUTDOWN
+
+
+

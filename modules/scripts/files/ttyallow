@@ -1,0 +1,8 @@
+#! /bin/ksh
+
+[[ $# = 1 ]] || {
+	echo >&2 "usage: $0 <username>"
+	exit 1
+}
+
+/usr/bin/chmod A+user:$1:rw:allow $(tty)

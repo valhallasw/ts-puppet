@@ -1,0 +1,6 @@
+command[check_load]=/usr/lib/nagios/plugins/check_load -w 15,15,15 -c 30,25,20
+command[check_smf]=/usr/lib/nagios/plugins/check_smf
+command[check_ipmi]=/usr/local/lib/nagios/plugins/check-ipmi
+command[check_tmp]=/usr/lib/nagios/plugins/check_disk -w 20% -c 10% -p /tmp
+command[check_root]=/usr/lib/nagios/plugins/check_disk -w 20% -c 10% -p /
+command[check_scstat]=/usr/lib/nagios/plugins/check_scstat -w 1,1,1 -c 1,2,2

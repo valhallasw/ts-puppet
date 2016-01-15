@@ -1,0 +1,6 @@
+# Repository for xtrabackup (needed for wmf-binary-dump-imports).
+# Managed by puppet.
+
+deb http://repo.percona.com/apt squeeze main
+
+#EOF

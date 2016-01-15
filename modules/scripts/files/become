@@ -1,0 +1,26 @@
+#! /bin/ksh
+
+[[ $# = 1 ]] || {
+	echo "$0: usage: $0 <project>"
+	exit 1
+}
+
+[[ `uname` = "Linux" ]] && {
+
+	[[ $GOINTOHOME = "" ]] && {
+		GOINTOHOME="YES"
+	}
+	
+	sudo -H -u $1 -s GOINTOHOME="$GOINTOHOME" /bin/bash -l
+}
+
+[[ `uname` = "SunOS" ]] && {
+
+	sudo -H -u $1 sh -c '
+	SHELL=/bin/bash
+	export SHELL
+	cd $HOME
+	exec bash'
+}
+
+#EOF

@@ -1,0 +1,80 @@
+#!/bin/bash
+#
+# Measures the cache-using of expresstrain.
+#
+# By DaB. <dab@toolserver.org>
+# BSD-license.
+
+PATH="/bin/:/usr/bin"
+
+MYSQL_ARGS=${MYSQL_ARGS:-"--defaults-file=/etc/mysql/debian.cnf -hlocalhost"}
+
+
+STATS=`mysql $MYSQL_ARGS --batch tsheartbeat -e \
+"SELECT st_name,
+ROUND(MIN(st_reader_cachehits)) AS min,
+ROUND(AVG(st_reader_cachehits)) AS avg, 
+ROUND(MAX(st_reader_cachehits)) AS max 
+FROM stats  
+WHERE st_timestamp>(NOW() - INTERVAL 5 MINUTE) 
+GROUP BY st_name;
+"\
+|tail -n 1|tr '\t' ','`
+
+if [ "$1" = "config" ]; then
+
+echo "multigraph cacheusing"
+echo "graph_title Cache using"
+echo 'graph_args --lower-limit 0'
+echo 'graph_category expresstrain'
+echo 'graph_vlabel Hits'
+
+echo 'avg.draw LINE2'
+echo 'avg.label Avg'
+
+for line in $STATS
+do
+name=`echo "$line"|cut -d',' -f 1`
+
+echo "multigraph cacheusing.${name}"
+echo "graph_title Cache using of ${name}"
+echo 'graph_args --lower-limit 0'
+echo 'graph_category expresstrain'
+echo 'graph_vlabel Hits' 
+
+echo 'max.draw AREA'
+echo 'max.label Max'
+echo 'min.draw AREA'   
+echo 'min.label Min'
+echo 'avg.draw LINE2'
+echo 'avg.label Avg'
+
+done
+
+exit 0
+fi
+
+avgTotal=0
+
+for line in $STATS
+do
+name=`echo "$line"|cut -d',' -f 1`
+min=`echo "$STATS"|cut -d',' -f 2`
+avg=`echo "$STATS"|cut -d',' -f 3`
+max=`echo "$STATS"|cut -d',' -f 4` 
+
+echo "multigraph cacheusing.${name}"
+echo "min.value ${min}"  
+echo "avg.value ${avg}"
+echo "max.value ${max}"  
+
+avgTotal=$(($avgTotall+$avg))
+
+done
+
+# Output total values.
+echo "multigraph cacheusing"
+echo "avg.value ${avgTotal}"
+
+
+#EOF

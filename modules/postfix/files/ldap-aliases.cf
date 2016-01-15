@@ -1,0 +1,5 @@
+server_host = ldap.toolserver.org
+search_base = ou=aliases,o=unix,o=toolserver
+version = 3
+query_filter = (&(cn=%s)(objectClass=mailGroup))
+result_attribute = mgrpRFC822MailMember

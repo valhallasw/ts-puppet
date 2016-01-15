@@ -1,0 +1,61 @@
+@	1D	IN SOA	a.ns-auth.toolserver.org. ts-admins.toolserver.org.	(
+				2011012001	; serial
+				12H		; refresh
+				2H		; retry
+				2W		; expiry
+				1H		; negative cache TTL
+				)
+
+@		1H IN NS	a.ns-auth.toolserver.org.
+ 		1H IN NS	b.ns-auth.toolserver.org.
+
+; s1
+enwiki-p	1H IN CNAME	sql-s1-rr.wita.toolserver.org.
+
+; s2
+bgwiki-p	1H IN CNAME	sql-s2-rr.wita.toolserver.org.
+bgwiktionary-p	1H IN CNAME	sql-s2-rr.wita.toolserver.org.
+cswiki-p	1H IN CNAME	sql-s2-rr.wita.toolserver.org.
+enwikiquote-p	1H IN CNAME	sql-s2-rr.wita.toolserver.org.
+enwiktionary-p	1H IN CNAME	sql-s2-rr.wita.toolserver.org.
+eowiki-p	1H IN CNAME	sql-s2-rr.wita.toolserver.org.
+fiwiki-p	1H IN CNAME	sql-s2-rr.wita.toolserver.org.
+idwiki-p	1H IN CNAME	sql-s2-rr.wita.toolserver.org.
+itwiki-p	1H IN CNAME	sql-s2-rr.wita.toolserver.org.
+nlwiki-p	1H IN CNAME	sql-s2-rr.wita.toolserver.org.
+nowiki-p	1H IN CNAME	sql-s2-rr.wita.toolserver.org.
+plwiki-p	1H IN CNAME	sql-s2-rr.wita.toolserver.org.
+ptwiki-p	1H IN CNAME	sql-s2-rr.wita.toolserver.org.
+svwiki-p	1H IN CNAME	sql-s2-rr.wita.toolserver.org.
+thwiki-p	1H IN CNAME	sql-s2-rr.wita.toolserver.org.
+trwiki-p	1H IN CNAME	sql-s2-rr.wita.toolserver.org.
+zhwiki-p	1H IN CNAME	sql-s2-rr.wita.toolserver.org.
+
+; s4
+commonswiki-p	1H IN CNAME	sql-s4-rr.wita.toolserver.org.
+
+; s5
+dewiki-p	1H IN CNAME	sql-s5-rr.wita.toolserver.org.
+
+; s6
+frwiki-p	1H IN CNAME	sql-s6-rr.wita.toolserver.org.
+jawiki-p	1H IN CNAME	sql-s6-rr.wita.toolserver.org.
+ruwiki-p	1H IN CNAME	sql-s6-rr.wita.toolserver.org.
+
+; s7
+eswiki-p	1H IN CNAME	sql-s7-rr.wita.toolserver.org.
+huwiki-p	1H IN CNAME	sql-s7-rr.wita.toolserver.org.
+hewiki-p	1H IN CNAME	sql-s7-rr.wita.toolserver.org.
+ukwiki-p	1H IN CNAME	sql-s7-rr.wita.toolserver.org.
+frwiktionary-p	1H IN CNAME	sql-s7-rr.wita.toolserver.org.
+metawiki-p	1H IN CNAME	sql-s7-rr.wita.toolserver.org.
+arwiki-p	1H IN CNAME	sql-s7-rr.wita.toolserver.org.
+centralauth-p	1H IN CNAME	sql-s7-rr.wita.toolserver.org.
+cawiki-p	1H IN CNAME	sql-s7-rr.wita.toolserver.org.
+viwiki-p	1H IN CNAME	sql-s7-rr.wita.toolserver.org.
+fawiki-p	1H IN CNAME	sql-s7-rr.wita.toolserver.org.
+rowiki-p	1H IN CNAME	sql-s7-rr.wita.toolserver.org.
+kowiki-p	1H IN CNAME	sql-s7-rr.wita.toolserver.org.
+
+; s3, default
+*		1H IN CNAME	sql-s3-rr.wita.toolserver.org.

@@ -1,0 +1,44 @@
+#!/bin/bash
+
+### BEGIN INIT INFO
+# Provides:          aliasd
+# Required-Start:    $local_fs $syslog $time 
+# Required-Stop:     $local_fs $syslog $time
+# Default-Start:     2
+# Default-Stop:      0 1 3 4 5 6
+# Short-Description: Aliasd
+# Description:       Aliasd for postfix and LDAP.
+### END INIT INFO
+
+# Author: DaB. <dab@toolserver.org>
+# Version 0.1.2012-02-28-02
+
+. /lib/lsb/init-functions
+
+PATH="/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/lib"
+DESC="aliasd daemon"
+NAME=aliasd
+DAEMON="/usr/local/lib/aliasd"
+PIDFILE=/var/run/aliasd.pid
+SCRIPTNAME=/etc/init.d/"$NAME"
+
+
+case "$1" in 
+start)  log_daemon_msg "Starting aliasd" "aliasd"
+#        start_daemon -p $PIDFILE $DAEMON $EXTRA_OPTS
+        /sbin/start-stop-daemon --start -b -m --pidfile $PIDFILE --name aliasd --startas $DAEMON
+        log_end_msg $? 
+        ;;
+stop)   log_daemon_msg "Stopping aliasd" "aliasd"
+        /sbin/start-stop-daemon --stop --name aliasd
+        log_end_msg $?
+        ;;
+restart) log_daemon_msg "Restarting aliasd" "aliasd"
+        $0 stop
+        $0 start
+        ;;
+*)      log_action_msg "Usage: /etc/init.d/aliasd {start|stop|status|restart}"
+        exit 2
+        ;;
+esac
+exit 0

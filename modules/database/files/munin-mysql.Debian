@@ -1,0 +1,7 @@
+[mysql_*]
+	user root
+	env.mysqlopts --defaults-file=/etc/mysql/debian.cnf
+	env.user debian-sys-maint
+	env.connection DBI:mysql:mysql;mysql_read_default_file=/etc/mysql/debian.cnf
+
+

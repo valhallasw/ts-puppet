@@ -1,0 +1,31 @@
+#! /bin/ksh
+
+PATH=/opt/local/bin:/opt/SUNWdsee/ds6/bin:/usr/bin
+LDAP_PATH=/global/misc/ldap
+
+if ! isactive ldap; then
+	exit 0
+fi
+
+SSH=/usr/bin/ssh
+SCP=/usr/bin/scp
+
+TODAY=$(date '+%Y-%m-%d')
+BCK_HOST=backups.toolserver.org
+BCK_USER=backups
+BCK_DIR=/backups/$TODAY/$(hostname)/ldap
+TMPDIR=/tmp/ldap
+
+rm -rf $TMPDIR
+mkdir $TMPDIR
+dsconf backup -h ldap -w /etc/ldap_secret ${TMPDIR}/data
+cp -r $LDAP_PATH/config ${TMPDIR}
+cp -r $LDAP_PATH/alias ${TMPDIR}
+
+cd /tmp || exit 1
+tar cf - ldap | gzip > ldap.tar.gz
+$SSH ${BCK_USER}@$BCK_HOST "mkdir -p $BCK_DIR"
+$SCP ldap.tar.gz ${BCK_USER}@$BCK_HOST:${BCK_DIR}
+
+rm ldap.tar.gz
+rm -rf $TMPDIR

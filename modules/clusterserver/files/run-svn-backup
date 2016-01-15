@@ -1,0 +1,19 @@
+#! /bin/ksh
+
+PATH=/opt/local/bin/usr/bin
+
+if ! isactive svn; then
+	exit 0
+fi
+
+SSH=/usr/bin/ssh
+SCP=/usr/bin/scp
+
+TODAY=$(date '+%Y-%m-%d')
+BCK_HOST=backups.toolserver.org
+BCK_USER=backups
+BCK_DIR=/backups/$TODAY/$(hostname)/svn
+
+cd /global/misc/svn || exit 1
+$SSH ${BCK_USER}@$BCK_HOST "mkdir -p $BCK_DIR"
+tar Ecf - svn | gzip | $SSH ${BCK_USER}@$BCK_HOST "cat >${BCK_DIR}/svn.tar.gz"

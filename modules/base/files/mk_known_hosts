@@ -1,0 +1,60 @@
+#! /bin/ksh
+
+rm -rf ssh_known_hosts.tmp
+exec 1>ssh_known_hosts.tmp
+
+KEYDIR="/etc/puppet/modules/base/files/keys"
+
+for host in $(ls "$KEYDIR"); do
+	if [[ ! -f "$KEYDIR/$host/ssh_host_dsa_key" ]]; then
+		echo >&2 "missing: $KEYDIR/$host/ssh_host_dsa_key"
+		continue
+	fi
+
+	if [[ ! -f "$KEYDIR/$host/ssh_host_rsa_key" ]]; then
+		echo >&2 "missing: $KEYDIR/$host/ssh_host_rsa_key"
+		continue
+	fi
+
+	if [[ ! -f "$KEYDIR/$host/ssh_host_ecdsa_key" ]]; then
+		echo >&2 "missing: $KEYDIR/$host/ssh_host_ecdsa_key"
+		continue
+	fi
+
+	fqdn=$(getent hosts "$host" | awk '{print $2}') || {
+		echo >&2 "can't resolve: $host"
+		continue
+	}
+
+	if ! echo "$fqdn" | grep '\.' >/dev/null; then
+		echo >&2 "$host: no dots in fqdn?"
+		continue
+	fi
+
+	ips=$(getent ipnodes "$host" | awk '{print $1}' | tr '\n' ',')
+	ips=${ips%,}
+	label="$fqdn,$host,$ips"
+
+	echo ""
+	echo "# $host"
+	echo ""
+	for keytype in rsa dsa ecdsa; do
+		echo "$fqdn,$host,$ips $(cat "$KEYDIR/$host/ssh_host_${keytype}_key.pub")"
+	done
+done
+
+sed '/^# BEGIN GENERATED OUTPUT -- DO NOT EDIT OR REMOVE/,/^# END GENERATED OUTPUT -- DO NOT EDIT OR REMOVE/ d' \
+	< ssh_known_hosts >ssh_known_hosts.new
+
+exec 1>>ssh_known_hosts.new
+echo ""
+echo "# BEGIN GENERATED OUTPUT -- DO NOT EDIT OR REMOVE"
+echo "# ssh_known_hosts built by $LOGNAME@$(hostname) on $(date)"
+echo "# in $PWD."
+echo ""
+cat ssh_known_hosts.tmp
+echo "# END GENERATED OUTPUT -- DO NOT EDIT OR REMOVE"
+
+exec 1>/dev/null
+mv ssh_known_hosts.new ssh_known_hosts
+echo >&2 "Done."

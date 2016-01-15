@@ -1,0 +1,21 @@
+#! /bin/ksh
+
+mysql -h localhost -BNe 'show processlist;' | 
+	sed -e 's/ /_/g' -e 's/	/ /g' -e 's/ /,/g' -e 's/,,/,-,/g' -e 's/,/ /g' |
+	while read id user host db cmd time state query; do
+		if [[ "$host" = "-" || "$host" = "localhost" || \
+		      "$user" = "root" || "$cmd" = "Sleep" ]]; then
+			continue;
+		fi
+
+		if [[ "$time" = NULL ]]; then
+			continue
+		fi
+
+		if (( time <= 60 )); then
+			continue
+		fi
+
+		echo "KILL $id;" | mysql -h localhost >/dev/null
+	done
+			

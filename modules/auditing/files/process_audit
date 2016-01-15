@@ -1,0 +1,13 @@
+#! /bin/ksh
+
+cd /var/audit || exit 1
+
+DATE=$(date +'%Y-%m-%d')
+mkdir -p /var/audit/processed/$DATE
+
+/usr/sbin/audit -n
+
+for x in 2*.2*.*; do
+	/opt/local/bin/parseaudit $x | gzip >processed/$DATE/${x}.gz
+	rm -f $x
+done

@@ -1,0 +1,4 @@
+# -- This file is under puppet-control! --
+
+[cron_jobs*]
+	user root
